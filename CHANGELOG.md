@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] — 2026-07-13
+
+### Added
+- **`/tools` endpoint**: List all active tools with pricing tiers and prices.
+- **`/usage` endpoint**: Per-tool call counts and total calls for spending transparency.
+- **5xx retry**: `fetchWithTimeout` now retries on HTTP 5xx server errors (not just 429).
+- **Cost examples** in README: concrete pricing scenarios (100 web searches = $1.00, etc.).
+- **Use cases section** in README: 7 workflow examples showing tool chains.
+- **`cached` field** in dataset schema: matches actual tool response format.
+
+### Changed
+- **README rewritten** as conversion-optimized landing page: value proposition, hero stats table, "Why This Exists" section, API endpoints table.
+- **actor.json description** optimized: 230-char compelling value proposition (was 517-char keyword list).
+- **openapi.json requestBody**: now documents the `preset` parameter (was empty `properties: {}`).
+- **Version bumped** to 0.2.0 across package.json, actor.json, main.ts, openapi.json.
+- **Dockerfile**: added `NODE_ENV=production` for V8 optimizations in runtime stage.
+
+### Fixed
+- **Flaky `resurrectDeadLink` test**: switched to `httpstat.us/404` (guaranteed 404), accepts API-failure as valid outcome.
+- **Removed inline comment** in main.ts catch block (violated no-comments rule).
+
 ## [0.1.1] — 2026-07-13 04:55 UTC
 
 ### Fixed

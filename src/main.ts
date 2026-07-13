@@ -37,7 +37,7 @@ import { validateBibliography } from './tools/batch_verify.js';
 
 export const server = new McpServer({
     name: 'research-mcp-server',
-    version: '0.1.0',
+    version: '0.2.0',
 });
 
 const requestIdStorage = new AsyncLocalStorage<string>();
@@ -369,7 +369,7 @@ log.info(`Active tool preset: ${activePreset} (${activeTools.size} tools)`);
 const toolCallCounts = new Map<string, number>();
 let totalToolCalls = 0;
 
-const toolPricingTier: Record<string, string> = {
+export const toolPricingTier: Record<string, string> = {
     web_search: 'tool-call-simple',
     extract_content: 'tool-call-simple',
     get_wikipedia: 'tool-call-simple',
@@ -892,7 +892,7 @@ app.get('/mcp', (_req, res) => {
 });
 
 app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.1.0', uptime: Math.floor(process.uptime()) });
+    res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.2.0', uptime: Math.floor(process.uptime()) });
 });
 
 app.get('/tools', (_req, res) => {

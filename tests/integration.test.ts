@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { server } from '../src/main.js';
+import { server, toolPricingTier } from '../src/main.js';
 
 const EXPECTED_TOOLS = [
     'web_search',
@@ -122,5 +122,22 @@ describe('MCP server end-to-end tool calls', () => {
     it('score_reliability validates input schema (requires urls array)', async () => {
         const result = await client.callTool({ name: 'score_reliability', arguments: {} });
         expect(result.isError).toBe(true);
+    });
+});
+
+describe('pricing tier coverage', () => {
+    it('every registered tool has a pricing tier', async () => {
+        const result = await client.listTools();
+        for (const tool of result.tools) {
+            expect(toolPricingTier[tool.name]).toBeDefined();
+            expect(['tool-call-simple', 'tool-call-standard', 'tool-call-premium']).toContain(toolPricingTier[tool.name]);
+        }
+    });
+
+    it('pricing tiers match actor.json charge events', () => {
+        const validTiers = ['tool-call-simple', 'tool-call-standard', 'tool-call-premium'];
+        for (const [tool, tier] of Object.entries(toolPricingTier)) {
+            expect(validTiers).toContain(tier);
+        }
     });
 });

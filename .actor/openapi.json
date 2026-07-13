@@ -3,7 +3,7 @@
     "info": {
         "title": "Research MCP Server",
         "description": "23 research tools for AI agents: web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, datasets, reliability scoring, Substack, Wayback Machine, Bluesky, Telegram, OpenStreetMap, trends, Mastodon, VK, counter-arguments, citation verification, bibliography validation, SEC filings, and citation formatting.",
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "servers": [
         {

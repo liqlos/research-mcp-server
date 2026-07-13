@@ -21,6 +21,10 @@
         "error": {
             "type": "string",
             "description": "Error message if tool failed"
+        },
+        "cached": {
+            "type": "boolean",
+            "description": "Whether the result was served from cache"
         }
     },
     "required": ["tool", "query", "count"]

@@ -8,6 +8,8 @@ RUN npm run build
 
 FROM apify/actor-node:24
 
+ENV NODE_ENV=production
+
 COPY --chown=myuser:myuser package*.json ./
 RUN npm --quiet set progress=false \
     && npm ci --omit=dev --omit=optional \
