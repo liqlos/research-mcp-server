@@ -883,7 +883,7 @@ app.post('/mcp', async (req, res) => {
         log.info(`MCP request completed: requestId=${requestId}`);
     } catch (err) {
         log.error(`MCP request failed: requestId=${requestId} error=${(err as Error).message}`);
-        res.status(500).json({ error: 'MCP server error' });
+        res.status(500).json({ error: 'MCP server error', requestId });
     }
 });
 
@@ -911,6 +911,30 @@ app.get('/usage', (_req, res) => {
         perTool: Object.fromEntries(
             [...toolCallCounts.entries()].sort((a, b) => b[1] - a[1]),
         ),
+    });
+});
+
+app.get('/pricing', (_req, res) => {
+    res.json({
+        model: 'PAY_PER_EVENT',
+        minimalMaxTotalChargeUsd: 1.0,
+        tiers: [
+            {
+                tier: 'tool-call-simple',
+                priceUsd: 0.01,
+                tools: Object.entries(toolPricingTier).filter(([, t]) => t === 'tool-call-simple').map(([n]) => n),
+            },
+            {
+                tier: 'tool-call-standard',
+                priceUsd: 0.02,
+                tools: Object.entries(toolPricingTier).filter(([, t]) => t === 'tool-call-standard').map(([n]) => n),
+            },
+            {
+                tier: 'tool-call-premium',
+                priceUsd: 0.03,
+                tools: Object.entries(toolPricingTier).filter(([, t]) => t === 'tool-call-premium').map(([n]) => n),
+            },
+        ],
     });
 });
 

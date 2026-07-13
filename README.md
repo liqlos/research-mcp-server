@@ -198,6 +198,7 @@ tools = await tool_spec.to_tool_list()
 | `/health` | GET | Server health check (status, tool count, preset, uptime) |
 | `/tools` | GET | List all active tools with pricing tiers |
 | `/usage` | GET | Usage stats (total calls, per-tool call counts) |
+| `/pricing` | GET | Full pricing breakdown by tier with tool lists |
 
 ## Rate Limits
 
@@ -230,6 +231,29 @@ Copy `.env.example` to `.env` and fill in values. Without Google API keys, web s
 ## Legal & Ethical Use
 
 This actor respects robots.txt, rate limits, and platform terms of service. Users are responsible for compliance with applicable laws and the terms of service of platforms accessed (Reddit, YouTube, SEC, Crossref, etc.).
+
+## FAQ
+
+**How is this different from using SerpAPI or Serper?**
+SerpAPI and Serper only do web search. This server covers 23 tools across web, social, academic, financial, and geographic data — all through one MCP endpoint. No need to manage multiple API keys, billing accounts, and integrations.
+
+**How is this different from building my own tools?**
+Building 23 research tools from scratch takes weeks: API integrations, error handling, caching, rate limiting, testing, deployment. This server is production-ready, tested (70 tests), and deployed on Apify's infrastructure with standby mode for instant responses.
+
+**Do I pay for failed calls?**
+No. You only pay for successful tool calls. If a tool returns an error (API down, invalid input, rate limited), you are not charged.
+
+**What MCP clients are supported?**
+Any MCP-compatible client: Claude Desktop, Cursor, ChatGPT, LangChain, LlamaIndex, Windsurf, and more. The server follows the MCP protocol specification.
+
+**Can I use only a subset of tools?**
+Yes. Use presets (`web`, `social`, `academic`, `data`) to load only the tools you need. This reduces token overhead in your AI agent's context window.
+
+**Is there a free tier?**
+Apify provides a free tier with $5 monthly credit. At $0.01–$0.03/call, that's 150–500 free calls per month.
+
+**What happens if an external API is down?**
+The server retries on 429 and 5xx errors with exponential backoff. If the API remains unavailable, the tool returns a clear error message (no charge). Cached results may still be served.
 
 ## Development
 
