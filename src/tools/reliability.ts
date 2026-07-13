@@ -31,11 +31,18 @@ const TLD_SCORES: Record<string, number> = {
     '.co': 0.4,
 };
 
+const MULTI_PART_TLDS = new Set(['co.uk', 'co.jp', 'co.kr', 'co.nz', 'co.in', 'co.za', 'com.au', 'com.br', 'com.mx', 'com.cn', 'com.hk', 'com.sg', 'com.tw', 'com.my', 'com.ph', 'com.vn', 'com.ar', 'com.co', 'com.pe', 'com.ve', 'com.ec', 'com.uy', 'com.py', 'com.bo', 'com.gt', 'com.sv', 'com.hn', 'com.ni', 'com.cr', 'com.do', 'com.pa', 'ac.uk', 'ac.jp', 'ac.kr', 'ac.nz', 'ac.in', 'ac.za', 'ac.at', 'ac.be', 'ac.dk', 'ac.fi', 'ac.fr', 'ac.de', 'ac.gr', 'ac.hu', 'ac.is', 'ac.ie', 'ac.it', 'ac.no', 'ac.pl', 'ac.pt', 'ac.es', 'ac.se', 'ac.ch', 'ac.tr', 'edu.au', 'edu.br', 'edu.cn', 'edu.hk', 'edu.sg', 'edu.tw', 'edu.my', 'gov.uk', 'gov.au', 'gov.cn', 'gov.br', 'gov.in', 'gov.za', 'org.uk', 'org.au', 'org.cn', 'net.au', 'net.cn', 'ne.jp', 'or.jp', 'or.kr', 'go.jp', 'go.id', 'go.th', 'go.vn', 'go.ph', 'go.my', 'go.sg', 'go.in', 'go.br', 'go.mx', 'go.ar', 'go.cl', 'go.co', 'go.pe', 'go.ve', 'go.ec', 'go.uy', 'go.py', 'go.bo', 'go.gt', 'go.sv', 'go.hn', 'go.ni', 'go.cr', 'go.do', 'go.pa']);
+
 function extractRootDomain(url: string): string {
     try {
         const parsed = new URL(url.startsWith('http') ? url : `https://${url}`);
-        const parts = parsed.hostname.split('.');
-        if (parts.length <= 2) return parsed.hostname;
+        const hostname = parsed.hostname.toLowerCase();
+        const parts = hostname.split('.');
+        if (parts.length <= 2) return hostname;
+        const lastTwo = parts.slice(-2).join('.');
+        if (MULTI_PART_TLDS.has(lastTwo) && parts.length >= 3) {
+            return parts.slice(-3).join('.');
+        }
         return parts.slice(-2).join('.');
     } catch {
         return url;

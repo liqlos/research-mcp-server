@@ -2,11 +2,13 @@
 
 ## Project
 
-MCP server on Apify. 23 research tools for AI agents. TypeScript, Vitest, Zod schemas.
+MCP server on Apify. 25 research tools for AI agents. TypeScript, Vitest, Zod schemas.
 
 ## State
 
-- 23 tools, 64 tests, 0 TS errors
+- 25 tools, 80 tests, 0 TS errors
+- MCP Resources: tool-guide, FAQ
+- MCP Prompts: research-topic, verify-claim, find-counter-arguments
 - Tiered pricing: $0.01 (simple), $0.02 (standard), $0.03 (premium)
 - 5 presets: all, web, social, academic, data
 - Converged after 8 improvement cycles (4 code + 4 CEO)

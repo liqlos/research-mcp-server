@@ -27,6 +27,8 @@ const EXPECTED_TOOLS = [
     'validate_bibliography',
     'search_sec_filings',
     'format_citations',
+    'resolve_open_access',
+    'search_pubmed',
 ];
 
 let client: Client;

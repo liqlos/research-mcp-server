@@ -13,6 +13,8 @@ import { searchSecFilings } from '../src/tools/sec.js';
 import { formatCitations } from '../src/tools/citations.js';
 import { verifyCitations } from '../src/tools/verify.js';
 import { validateBibliography } from '../src/tools/batch_verify.js';
+import { resolveOpenAccess } from '../src/tools/unpaywall.js';
+import { searchPubmed } from '../src/tools/pubmed.js';
 
 describe('scoreDomain', () => {
     it('scores Wikipedia as HIGH (1.0)', () => {
@@ -236,4 +238,74 @@ describe('validateBibliography', () => {
         expect(result.results[0]).toHaveProperty('results');
         expect(result.results[0].total).toBe(3);
     }, 60000);
+});
+
+describe('scoreDomain — multi-part TLDs', () => {
+    it('correctly extracts bbc.co.uk (not co.uk)', () => {
+        const { score, tier } = scoreDomain('https://www.bbc.co.uk/news');
+        expect(score).toBe(0.75);
+        expect(tier).toBe('MEDIUM-HIGH');
+    });
+
+    it('correctly extracts bbc.com', () => {
+        const { score, tier } = scoreDomain('https://www.bbc.com/news');
+        expect(score).toBe(0.75);
+        expect(tier).toBe('MEDIUM-HIGH');
+    });
+
+    it('handles subdomain of co.uk domain', () => {
+        const { score } = scoreDomain('https://news.bbc.co.uk');
+        expect(score).toBe(0.75);
+    });
+
+    it('does not treat co.uk as root domain for arbitrary subdomains', () => {
+        const { score, tier } = scoreDomain('https://random-site.co.uk');
+        expect(tier).toBe('VERY_LOW');
+        expect(score).toBe(0.3);
+    });
+});
+
+describe('resolveOpenAccess', () => {
+    it('resolves a known DOI', async () => {
+        const result = await resolveOpenAccess('10.1038/nature12373');
+        expect(result).toHaveProperty('count');
+        expect(result).toHaveProperty('results');
+        if (result.count > 0) {
+            expect(result.results[0]).toHaveProperty('doi');
+            expect(result.results[0]).toHaveProperty('isOpenAccess');
+            expect(result.results[0]).toHaveProperty('oaStatus');
+        }
+    }, 30000);
+
+    it('handles invalid DOI gracefully', async () => {
+        const result = await resolveOpenAccess('10.9999/invalid-doi-xxxxx');
+        expect(result).toHaveProperty('count');
+        expect(result.count).toBe(0);
+    }, 30000);
+});
+
+describe('searchPubmed', () => {
+    it('searches for CRISPR papers', async () => {
+        const result = await searchPubmed('CRISPR gene editing', 5);
+        expect(result).toHaveProperty('count');
+        expect(result).toHaveProperty('results');
+        if (result.count > 0) {
+            expect(result.results[0]).toHaveProperty('pmid');
+            expect(result.results[0]).toHaveProperty('title');
+            expect(result.results[0]).toHaveProperty('url');
+            expect(result.results[0].url).toContain('pubmed.ncbi.nlm.nih.gov');
+        }
+    }, 30000);
+
+    it('handles empty query', async () => {
+        const result = await searchPubmed('', 5);
+        expect(result.count).toBe(0);
+        expect(result).toHaveProperty('error');
+    }, 10000);
+
+    it('caps maxResults at 50', async () => {
+        const result = await searchPubmed('cancer', 100);
+        expect(result).toHaveProperty('count');
+        expect(result.count).toBeLessThanOrEqual(50);
+    }, 30000);
 });

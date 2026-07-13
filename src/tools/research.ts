@@ -147,6 +147,8 @@ export const CACHE_TTL_MS = {
     verify_citations: 86_400_000,
     validate_bibliography: 86_400_000,
     score_reliability: 86_400_000,
+    resolve_open_access: 7 * 24 * 60 * 60 * 1000,
+    search_pubmed: 60 * 60 * 1000,
 } as const;
 
 interface CacheEntry {

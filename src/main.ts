@@ -34,16 +34,18 @@ import { searchSecFilings } from './tools/sec.js';
 import { formatCitations } from './tools/citations.js';
 import { verifyCitations } from './tools/verify.js';
 import { validateBibliography } from './tools/batch_verify.js';
+import { resolveOpenAccess } from './tools/unpaywall.js';
+import { searchPubmed } from './tools/pubmed.js';
 
 export const server = new McpServer({
     name: 'research-mcp-server',
-    version: '0.2.0',
+    version: '0.3.0',
 });
 
 function getServer(): McpServer {
     return new McpServer({
         name: 'research-mcp-server',
-        version: '0.2.0',
+        version: '0.3.0',
     });
 }
 
@@ -339,6 +341,40 @@ const CitationResultSchema = z.object({
     url: z.string(),
 });
 
+const OpenAccessResultSchema = z.object({
+    doi: z.string(),
+    title: z.string(),
+    authors: z.array(z.string()),
+    publishedYear: z.number(),
+    isOpenAccess: z.boolean(),
+    oaStatus: z.string(),
+    bestOaLocation: z.object({
+        url: z.string(),
+        hostType: z.string(),
+        version: z.string(),
+        license: z.string(),
+        pdfUrl: z.string(),
+    }).nullable(),
+    oaLocations: z.array(z.object({
+        url: z.string(),
+        hostType: z.string(),
+        version: z.string(),
+        pdfUrl: z.string(),
+    })),
+});
+
+const PubmedResultSchema = z.object({
+    pmid: z.string(),
+    title: z.string(),
+    authors: z.array(z.string()),
+    journal: z.string(),
+    publishedDate: z.string(),
+    abstract: z.string(),
+    doi: z.string(),
+    url: z.string(),
+    source: z.string(),
+});
+
 function toolResponseSchema<T extends z.ZodType>(item: T) {
     return z.object({
         query: z.string(),
@@ -350,10 +386,10 @@ function toolResponseSchema<T extends z.ZodType>(item: T) {
 }
 
 const toolPresets: Record<string, string[]> = {
-    all: ['web_search', 'extract_content', 'search_reddit', 'search_youtube', 'search_news', 'search_hackernews', 'get_wikipedia', 'search_preprints', 'search_datasets', 'score_reliability', 'search_substack', 'resurrect_dead_link', 'search_bluesky', 'search_telegram', 'search_osm', 'detect_trends', 'search_mastodon', 'search_vk', 'find_counter_arguments', 'verify_citations', 'validate_bibliography', 'search_sec_filings', 'format_citations'],
+    all: ['web_search', 'extract_content', 'search_reddit', 'search_youtube', 'search_news', 'search_hackernews', 'get_wikipedia', 'search_preprints', 'search_datasets', 'score_reliability', 'search_substack', 'resurrect_dead_link', 'search_bluesky', 'search_telegram', 'search_osm', 'detect_trends', 'search_mastodon', 'search_vk', 'find_counter_arguments', 'verify_citations', 'validate_bibliography', 'search_sec_filings', 'format_citations', 'resolve_open_access', 'search_pubmed'],
     web: ['web_search', 'extract_content', 'search_news', 'get_wikipedia', 'resurrect_dead_link', 'score_reliability'],
     social: ['search_reddit', 'search_hackernews', 'search_youtube', 'search_substack', 'search_bluesky', 'search_telegram', 'search_mastodon', 'search_vk', 'detect_trends'],
-    academic: ['search_preprints', 'search_datasets', 'find_counter_arguments', 'verify_citations', 'validate_bibliography', 'format_citations'],
+    academic: ['search_preprints', 'search_datasets', 'find_counter_arguments', 'verify_citations', 'validate_bibliography', 'format_citations', 'resolve_open_access', 'search_pubmed'],
     data: ['search_osm', 'search_sec_filings'],
 };
 
@@ -400,6 +436,8 @@ export const toolPricingTier: Record<string, string> = {
     verify_citations: 'tool-call-premium',
     validate_bibliography: 'tool-call-premium',
     format_citations: 'tool-call-premium',
+    resolve_open_access: 'tool-call-standard',
+    search_pubmed: 'tool-call-standard',
 };
 
 function registerResearchTool(
@@ -868,9 +906,191 @@ registerResearchTool(
         return makeResult(JSON.stringify(result, null, 2), result);
     },
 );
+
+registerResearchTool(
+    'resolve_open_access',
+    {
+        description: 'Find free legal PDF versions for academic papers via Unpaywall. Given a DOI, returns open-access status, PDF URLs, host types, and OA status (gold/green/hybrid/bronze). Use after search_preprints or format_citations to get actual PDFs. Example: resolve_open_access({ doi: "10.1038/nature12373" })',
+        inputSchema: {
+            doi: z.string().describe('DOI of the paper (e.g. 10.1038/nature12373)'),
+        },
+        outputSchema: toolResponseSchema(OpenAccessResultSchema),
+        annotations: toolAnnotations,
+    },
+    async (args) => {
+        log.info(`resolve_open_access: doi=${args.doi} requestId=${getRequestId()}`);
+        const result = await resolveOpenAccess(args.doi);
+        return makeResult(JSON.stringify(result, null, 2), result);
+    },
+);
+
+registerResearchTool(
+    'search_pubmed',
+    {
+        description: 'Search biomedical literature via PubMed (35M+ papers) and Europe PMC (40M+). Returns titles, authors, journals, dates, DOIs, and URLs. Use for medical/biological research. Example: search_pubmed({ query: "CRISPR gene editing", maxResults: 10 })',
+        inputSchema: {
+            query: z.string().describe('Search query for biomedical literature'),
+            maxResults: z.number().int().min(1).max(50).optional().describe('Max results (default: 10)'),
+        },
+        outputSchema: toolResponseSchema(PubmedResultSchema),
+        annotations: toolAnnotations,
+    },
+    async (args) => {
+        log.info(`search_pubmed: ${args.query} requestId=${getRequestId()}`);
+        const result = await searchPubmed(args.query, args.maxResults ?? 10);
+        return makeResult(JSON.stringify(result, null, 2), result);
+    },
+);
 }
 
 registerAllTools();
+
+function registerResourcesAndPrompts(target: McpServer): void {
+target.registerResource(
+    'tool-guide',
+    'research://tool-guide',
+    { title: 'Research Tool Guide', description: 'Complete guide to all 25 research tools with examples and pricing', mimeType: 'text/markdown' },
+    async () => ({
+        contents: [{
+            uri: 'research://tool-guide',
+            mimeType: 'text/markdown',
+            text: [
+                '# Research MCP Server — Tool Guide',
+                '',
+                '## Web & Content ($0.01/call)',
+                '- **web_search** — Google/DuckDuckGo web search. `web_search({ query: "rust async" })`',
+                '- **extract_content** — Clean text from any URL. `extract_content({ url: "https://..." })`',
+                '- **search_news** — Google News RSS. `search_news({ query: "AI regulation" })`',
+                '- **get_wikipedia** — Wikipedia summaries. `get_wikipedia({ query: "quantum" })`',
+                '- **resurrect_dead_link** — Wayback Machine for dead URLs. `resurrect_dead_link({ url: "..." })`',
+                '- **score_reliability** — Source reliability scoring. `score_reliability({ urls: ["..."] })`',
+                '',
+                '## Social & Discussion ($0.02/call)',
+                '- **search_reddit** — Reddit posts + comments. `search_reddit({ query: "best keyboard" })`',
+                '- **search_hackernews** — Hacker News via Algolia. `search_hackernews({ query: "vectors" })`',
+                '- **search_youtube** — YouTube videos + transcripts. `search_youtube({ query: "rust" })`',
+                '- **search_substack** — Substack newsletters via RSS. `search_substack({ publications: ["stratechery"] })`',
+                '- **search_bluesky** — Bluesky AT Protocol posts. `search_bluesky({ query: "AI" })`',
+                '- **search_telegram** — Public Telegram channels. `search_telegram({ channel: "durov" })`',
+                '- **search_mastodon** — Mastodon Fediverse posts. `search_mastodon({ query: "rust" })`',
+                '- **search_vk** — VKontakte posts. `search_vk({ query: "ИИ" })`',
+                '- **detect_trends** — Trending across platforms. `detect_trends({ platforms: ["reddit"] })`',
+                '',
+                '## Academic & Research ($0.02-$0.03/call)',
+                '- **search_preprints** — arXiv/bioRxiv/medRxiv. `search_preprints({ query: "CRISPR" })`',
+                '- **search_pubmed** — PubMed/Europe PMC biomedical literature. `search_pubmed({ query: "CRISPR" })`',
+                '- **search_datasets** — Zenodo/Figshare/OSF. `search_datasets({ query: "climate" })`',
+                '- **resolve_open_access** — Free PDF via Unpaywall. `resolve_open_access({ doi: "10.1038/..." })`',
+                '- **find_counter_arguments** — Papers for/against a claim. `find_counter_arguments({ query: "..." })`',
+                '- **verify_citations** — Verify against Crossref/OpenAlex. `verify_citations({ references: ["..."] })`',
+                '- **validate_bibliography** — Validate entire bibliography. `validate_bibliography({ bibliography: "..." })`',
+                '- **format_citations** — BibTeX/APA/MLA/Chicago/RIS. `format_citations({ doi: "10....", format: "bibtex" })`',
+                '',
+                '## Specialized Data ($0.02/call)',
+                '- **search_osm** — OpenStreetMap POIs. `search_osm({ query: "restaurant", location: "Berlin" })`',
+                '- **search_sec_filings** — SEC EDGAR filings. `search_sec_filings({ query: "AAPL", filingType: "10-K" })`',
+                '',
+                '## Presets',
+                '- `all` (default) — 25 tools',
+                '- `web` — 6 web/content tools',
+                '- `social` — 9 social/discussion tools',
+                '- `academic` — 8 academic/research tools',
+                '- `data` — 2 specialized data tools',
+            ].join('\n'),
+        }],
+    }),
+);
+
+target.registerResource(
+    'faq',
+    'research://faq',
+    { title: 'FAQ', description: 'Frequently asked questions about the Research MCP Server', mimeType: 'text/markdown' },
+    async () => ({
+        contents: [{
+            uri: 'research://faq',
+            mimeType: 'text/markdown',
+            text: [
+                '# Research MCP Server — FAQ',
+                '',
+                '## How do I get an Apify token?',
+                'Sign up at apify.com (free $5 credit = 150-500 tool calls). Copy your API token from the dashboard.',
+                '',
+                '## How much does it cost?',
+                '- $0.01/call for simple lookups (web search, Wikipedia, Wayback)',
+                '- $0.02/call for standard tools (Reddit, YouTube, PubMed, Open Access)',
+                '- $0.03/call for premium tools (citation verification, counter-arguments)',
+                '- You only pay for successful calls — errors are free.',
+                '',
+                '## What MCP clients are supported?',
+                'Claude Desktop, Cursor, ChatGPT, LangChain, LlamaIndex, and any MCP-compatible client.',
+                '',
+                '## How do I use presets?',
+                'Set Actor input JSON `{"preset": "web"}` in Apify Console to load only web tools (saves tokens).',
+                '',
+                '## Is there a rate limit?',
+                'Yes: 60 requests/minute. All tools use caching to reduce redundant calls.',
+                '',
+                '## How many tools are available?',
+                '25 tools across 5 categories: web/content, social/discussion, academic/research, specialized data.',
+            ].join('\n'),
+        }],
+    }),
+);
+
+target.registerPrompt(
+    'research-topic',
+    {
+        title: 'Research a Topic',
+        description: 'Comprehensive research workflow: search web, find academic papers, verify citations, score reliability',
+        argsSchema: {
+            topic: z.string().describe('Topic to research'),
+            depth: z.string().optional().describe('Research depth: quick, standard, or deep'),
+        },
+    },
+    async (args) => ({
+        messages: [{
+            role: 'user',
+            content: { type: 'text', text: `Research the topic "${args.topic}" with ${args.depth || 'standard'} depth.\n\nWorkflow:\n1. Use web_search to find overview articles\n2. Use search_preprints and search_pubmed for academic sources\n3. Use extract_content on the most relevant results\n4. Use score_reliability on the sources found\n5. Use resolve_open_access to find free PDFs for key papers\n6. Use verify_citations on any claims made\n7. Synthesize findings into a structured report with citations` },
+        }],
+    }),
+);
+
+target.registerPrompt(
+    'verify-claim',
+    {
+        title: 'Verify a Claim',
+        description: 'Fact-check a claim: search for evidence, find counter-arguments, verify citations',
+        argsSchema: {
+            claim: z.string().describe('The claim to verify'),
+        },
+    },
+    async (args) => ({
+        messages: [{
+            role: 'user',
+            content: { type: 'text', text: `Verify this claim: "${args.claim}"\n\nWorkflow:\n1. Use web_search to find sources supporting and contradicting the claim\n2. Use search_reddit and search_hackernews for community discussion\n3. Use find_counter_arguments to find academic papers against the claim\n4. Use score_reliability on all sources found\n5. Use verify_citations on any cited references\n6. Provide a verdict: supported, partially supported, refuted, or inconclusive` },
+        }],
+    }),
+);
+
+target.registerPrompt(
+    'find-counter-arguments',
+    {
+        title: 'Find Counter-Arguments',
+        description: 'Find academic counter-arguments and opposing viewpoints for a position',
+        argsSchema: {
+            position: z.string().describe('The position to find counter-arguments for'),
+        },
+    },
+    async (args) => ({
+        messages: [{
+            role: 'user',
+            content: { type: 'text', text: `Find counter-arguments for this position: "${args.position}"\n\nWorkflow:\n1. Use find_counter_arguments to find academic papers\n2. Use search_preprints for recent preprints on the topic\n3. Use search_pubmed for biomedical literature if relevant\n4. Use search_reddit and search_hackernews for community debates\n5. Use extract_content on key opposing sources\n6. Synthesize the strongest counter-arguments with citations` },
+        }],
+    }),
+);
+}
+
+registerResourcesAndPrompts(server);
 
 if (!process.env.VITEST) {
 const app = express();
@@ -893,6 +1113,7 @@ app.post('/mcp', async (req, res) => {
         log.info(`MCP request started: requestId=${requestId}`);
         const requestServer = getServer();
         registerAllTools(requestServer);
+        registerResourcesAndPrompts(requestServer);
         const transport = new StreamableHTTPServerTransport({} as { sessionIdGenerator?: () => string });
         await requestServer.connect(transport as never);
         await requestIdStorage.run(requestId, () => transport.handleRequest(req, res, req.body));
@@ -916,8 +1137,8 @@ app.get('/mcp', (_req, res) => {
 app.get('/', (_req, res) => {
     res.json({
         name: 'Research MCP Server',
-        version: '0.2.0',
-        description: '23 research tools for AI agents',
+        version: '0.3.0',
+        description: '25 research tools for AI agents',
         endpoints: {
             '/mcp': 'POST — MCP protocol endpoint',
             '/health': 'GET — health check',
@@ -931,7 +1152,7 @@ app.get('/', (_req, res) => {
 });
 
 app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.2.0', uptime: Math.floor(process.uptime()) });
+    res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.3.0', uptime: Math.floor(process.uptime()) });
 });
 
 app.get('/tools', (_req, res) => {

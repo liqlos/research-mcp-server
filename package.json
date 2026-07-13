@@ -1,8 +1,8 @@
 {
     "name": "research-mcp-server",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "type": "module",
-    "description": "Research MCP server — one endpoint, 23 tools for AI agents. Web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, datasets, reliability scoring, Substack, Wayback, Bluesky, Telegram, OSM, trends, Mastodon, VK, counter-arguments, citation verification, SEC filings, citation formatting.",
+    "description": "Research MCP server — one endpoint, 25 tools for AI agents. Web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, PubMed, datasets, open-access PDFs, reliability scoring, Substack, Wayback, Bluesky, Telegram, OSM, trends, Mastodon, VK, counter-arguments, citation verification, SEC filings, citation formatting. MCP Resources + Prompts.",
     "engines": {
         "node": ">=20.0.0"
     },
