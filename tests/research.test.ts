@@ -237,6 +237,22 @@ describe('Error Path Tests', () => {
         expect(result.query).toBe('retry-after-header-test');
     }, 30000);
 
+    it('5xx retry logic: retries on server error then succeeds', async () => {
+        let callCount = 0;
+        globalThis.fetch = vi.fn(async () => {
+            callCount++;
+            if (callCount === 1) {
+                return new Response('server error', { status: 503 });
+            }
+            return new Response(JSON.stringify({ hits: [] }), { status: 200, headers: { 'content-type': 'application/json' } });
+        }) as typeof fetch;
+
+        const result = await searchHackerNews('retry-test-query-503', 3);
+        expect(callCount).toBeGreaterThanOrEqual(2);
+        expect(result.query).toBe('retry-test-query-503');
+        expect(result).toHaveProperty('count');
+    }, 30000);
+
     it('cache hit: second call with same params has cached: true', async () => {
         let callCount = 0;
         globalThis.fetch = vi.fn(async () => {

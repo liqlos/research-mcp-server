@@ -15,7 +15,8 @@
     "categories": [
         "MCP",
         "AI_API",
-        "AGENTS"
+        "AGENTS",
+        "SOCIAL_MEDIA"
     ],
     "usesStandbyMode": true,
     "webServerSchema": "./openapi.json",
