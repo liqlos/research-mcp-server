@@ -1,0 +1,665 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Research MCP Server",
+        "description": "23 research tools for AI agents: web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, datasets, reliability scoring, Substack, Wayback Machine, Bluesky, Telegram, OpenStreetMap, trends, Mastodon, VK, counter-arguments, citation verification, bibliography validation, SEC filings, and citation formatting.",
+        "version": "0.1.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.apify.com/v2"
+        }
+    ],
+    "paths": {
+        "/acts/research-mcp-server/run-sync-get-dataset-items": {
+            "post": {
+                "operationId": "run-research-mcp-server",
+                "summary": "Run Research MCP Server",
+                "tags": ["Run Actor"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "required": true,
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/tools/web_search": {
+            "post": {
+                "operationId": "web_search",
+                "summary": "Search the web via Google (with API key) or DuckDuckGo fallback",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Search results with titles, URLs, and snippets" }
+                }
+            }
+        },
+        "/tools/extract_content": {
+            "post": {
+                "operationId": "extract_content",
+                "summary": "Extract clean text content from any URL",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": { "type": "string", "format": "uri", "description": "URL to extract content from" }
+                                },
+                                "required": ["url"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Extracted title, text, and word count" }
+                }
+            }
+        },
+        "/tools/search_reddit": {
+            "post": {
+                "operationId": "search_reddit",
+                "summary": "Search Reddit posts and comments",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "subreddit": { "type": "string", "description": "Restrict to subreddit (optional)" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Reddit posts with title, subreddit, author, score, comments" }
+                }
+            }
+        },
+        "/tools/search_youtube": {
+            "post": {
+                "operationId": "search_youtube",
+                "summary": "Search YouTube videos and extract transcripts",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" },
+                                    "includeTranscript": { "type": "boolean", "description": "Include transcript text (default: true)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "YouTube videos with transcripts, duration, views" }
+                }
+            }
+        },
+        "/tools/search_news": {
+            "post": {
+                "operationId": "search_news",
+                "summary": "Search Google News RSS",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "News articles with title, URL, source, publish date, snippet" }
+                }
+            }
+        },
+        "/tools/search_hackernews": {
+            "post": {
+                "operationId": "search_hackernews",
+                "summary": "Search Hacker News via Algolia API",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Hacker News stories with score, author, comment count" }
+                }
+            }
+        },
+        "/tools/get_wikipedia": {
+            "post": {
+                "operationId": "get_wikipedia",
+                "summary": "Get Wikipedia article summary",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Topic to look up" },
+                                    "sentences": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Summary length in sentences (default: 5)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Wikipedia article title, URL, extract, categories" }
+                }
+            }
+        },
+        "/tools/search_preprints": {
+            "post": {
+                "operationId": "search_preprints",
+                "summary": "Search preprint servers (arXiv, bioRxiv, medRxiv)",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Preprints with title, authors, abstract, URL, source, DOI" }
+                }
+            }
+        },
+        "/tools/search_datasets": {
+            "post": {
+                "operationId": "search_datasets",
+                "summary": "Search research data repositories (Zenodo, Figshare, OSF)",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Datasets with title, description, URL, source, authors, DOI" }
+                }
+            }
+        },
+        "/tools/score_reliability": {
+            "post": {
+                "operationId": "score_reliability",
+                "summary": "Score source reliability for URLs",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "urls": {
+                                        "type": "array",
+                                        "items": { "type": "string", "format": "uri" },
+                                        "minItems": 1,
+                                        "maxItems": 100,
+                                        "description": "URLs to score"
+                                    }
+                                },
+                                "required": ["urls"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Reliability scores and tiers for each URL" }
+                }
+            }
+        },
+        "/tools/search_substack": {
+            "post": {
+                "operationId": "search_substack",
+                "summary": "Search Substack newsletters via RSS feeds",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "publications": {
+                                        "type": "array",
+                                        "items": { "type": "string" },
+                                        "minItems": 1,
+                                        "maxItems": 20,
+                                        "description": "Substack publication names or URLs"
+                                    },
+                                    "maxPosts": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max posts per publication (default: 50)" }
+                                },
+                                "required": ["publications"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Substack posts with title, author, body, categories, paywall status" }
+                }
+            }
+        },
+        "/tools/resurrect_dead_link": {
+            "post": {
+                "operationId": "resurrect_dead_link",
+                "summary": "Find archived version of dead/broken URLs via Wayback Machine",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": { "type": "string", "format": "uri", "description": "URL to check and resurrect if dead" },
+                                    "targetDate": { "type": "string", "description": "Target archive date (YYYYMMDD format, optional)" }
+                                },
+                                "required": ["url"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Archived URL with timestamp and status" }
+                }
+            }
+        },
+        "/tools/search_bluesky": {
+            "post": {
+                "operationId": "search_bluesky",
+                "summary": "Search Bluesky (AT Protocol) public posts",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Max results (default: 10)" },
+                                    "sort": { "type": "string", "enum": ["top", "latest"], "description": "Sort order (default: top)" },
+                                    "until": { "type": "string", "description": "ISO date for time-based pagination" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Bluesky posts with author, engagement counts, URL" }
+                }
+            }
+        },
+        "/tools/search_telegram": {
+            "post": {
+                "operationId": "search_telegram",
+                "summary": "Search public Telegram channels via t.me/s/ preview pages",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "channel": { "type": "string", "description": "Telegram channel username (without @)" },
+                                    "maxMessages": { "type": "integer", "minimum": 1, "maximum": 500, "description": "Max messages to fetch (default: 50)" }
+                                },
+                                "required": ["channel"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Telegram messages with text, date, views, author, permalink" }
+                }
+            }
+        },
+        "/tools/search_osm": {
+            "post": {
+                "operationId": "search_osm",
+                "summary": "Search OpenStreetMap via Overpass API for POIs and amenities",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query (name or amenity type)" },
+                                    "location": { "type": "string", "description": "Address or place name for nearby search" },
+                                    "radius": { "type": "integer", "minimum": 100, "maximum": 50000, "description": "Search radius in meters (default: 1000, requires location)" },
+                                    "bbox": {
+                                        "type": "object",
+                                        "properties": {
+                                            "latBottom": { "type": "number" },
+                                            "latTop": { "type": "number" },
+                                            "lonLeft": { "type": "number" },
+                                            "lonRight": { "type": "number" }
+                                        },
+                                        "description": "Bounding box for area search"
+                                    },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Max results (default: 50)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OpenStreetMap POIs with name, type, lat/lon, tags" }
+                }
+            }
+        },
+        "/tools/detect_trends": {
+            "post": {
+                "operationId": "detect_trends",
+                "summary": "Detect trending topics across Reddit, Hacker News, YouTube, and Google News",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "platforms": {
+                                        "type": "array",
+                                        "items": { "type": "string", "enum": ["reddit", "hackernews", "youtube", "news"] },
+                                        "description": "Platforms to scan (default: all)"
+                                    },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Max results (default: 50)" },
+                                    "query": { "type": "string", "maxLength": 500, "description": "Search query for YouTube RSS feed" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Trending items with normalized scores and cross-platform clusters" }
+                }
+            }
+        },
+        "/tools/search_mastodon": {
+            "post": {
+                "operationId": "search_mastodon",
+                "summary": "Search Mastodon Fediverse public posts across multiple instances",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query (empty for trending statuses)" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 40, "description": "Max results (default: 10)" },
+                                    "instances": {
+                                        "type": "array",
+                                        "items": { "type": "string" },
+                                        "description": "Custom instances to search (default: 5 popular instances)"
+                                    }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Mastodon posts with author, engagement counts, instance" }
+                }
+            }
+        },
+        "/tools/search_vk": {
+            "post": {
+                "operationId": "search_vk",
+                "summary": "Search VKontakte (VK) public posts via official API",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Search query" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "VK posts with text, author, likes, reposts, comments, URL" }
+                }
+            }
+        },
+        "/tools/find_counter_arguments": {
+            "post": {
+                "operationId": "find_counter_arguments",
+                "summary": "Find academic papers supporting, contrasting, or mentioning a claim",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "description": "Claim or topic to find counter-arguments for" },
+                                    "maxResults": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max papers per category (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Papers classified by stance: supporting, contrasting, mentioning" }
+                }
+            }
+        },
+        "/tools/verify_citations": {
+            "post": {
+                "operationId": "verify_citations",
+                "summary": "Verify if citations/references are real by checking against Crossref and OpenAlex",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "references": {
+                                        "type": "array",
+                                        "items": { "type": "string" },
+                                        "minItems": 1,
+                                        "maxItems": 50,
+                                        "description": "Array of citation strings or DOIs to verify"
+                                    },
+                                    "limit": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max references to verify (default: 20)" }
+                                },
+                                "required": ["references"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Verification results classified as VERIFIED, MISMATCH, or NOT_FOUND" }
+                }
+            }
+        },
+        "/tools/validate_bibliography": {
+            "post": {
+                "operationId": "validate_bibliography",
+                "summary": "Validate an entire bibliography at once with auto-format detection",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "bibliography": { "type": "string", "maxLength": 50000, "description": "Entire bibliography text to validate" },
+                                    "format": { "type": "string", "enum": ["auto", "apa", "mla", "bibtex", "plain"], "description": "Reference format (default: auto-detect)" },
+                                    "limit": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Max references to validate (default: 50)" }
+                                },
+                                "required": ["bibliography"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Summary counts and per-reference verification details" }
+                }
+            }
+        },
+        "/tools/search_sec_filings": {
+            "post": {
+                "operationId": "search_sec_filings",
+                "summary": "Search SEC EDGAR filings by company ticker or name",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": { "type": "string", "maxLength": 100, "description": "Company ticker (e.g. AAPL) or company name" },
+                                    "filingType": { "type": "string", "enum": ["10-K", "10-Q", "8-K", "ALL"], "description": "Filing type filter (default: ALL)" },
+                                    "limit": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results (default: 10)" }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "SEC filings with form type, filing date, accession number, URL" }
+                }
+            }
+        },
+        "/tools/format_citations": {
+            "post": {
+                "operationId": "format_citations",
+                "summary": "Generate formatted citations (BibTeX, APA, MLA, Chicago, RIS) from DOIs or paper metadata",
+                "tags": ["Tools"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "doi": { "type": "string", "maxLength": 200, "description": "DOI to fetch metadata for" },
+                                    "title": { "type": "string", "maxLength": 500, "description": "Paper title to search Crossref (used if no DOI provided)" },
+                                    "format": { "type": "string", "enum": ["bibtex", "apa", "mla", "chicago", "ris"], "description": "Citation format (default: apa)" },
+                                    "limit": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Max results for title search (default: 1)" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Formatted citation string plus raw metadata" }
+                }
+            }
+        }
+    }
+}

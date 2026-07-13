@@ -1,0 +1,55 @@
+{
+    "actorSpecification": 1,
+    "name": "research-mcp-server",
+    "title": "Research MCP Server — 23 Tools for AI Agents",
+    "description": "One MCP endpoint, 23 research tools: web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, datasets, reliability scoring, Substack, Wayback, Bluesky, Telegram, OpenStreetMap, trends, Mastodon, VK, counter-arguments, citation verification, bibliography validation, SEC filings, citation formatting. For Claude, Cursor, ChatGPT, and any MCP client.",
+    "version": "0.1.0",
+    "buildTag": "latest",
+    "meta": {
+        "templateId": "ts-mcp-empty"
+    },
+    "storages": {
+        "dataset": "./dataset_schema.json"
+    },
+    "dockerfile": "../Dockerfile",
+    "categories": [
+        "MCP",
+        "AI_API",
+        "AGENTS"
+    ],
+    "usesStandbyMode": true,
+    "webServerSchema": "./openapi.json",
+    "webServerMcpPath": "/mcp",
+    "defaultRunOptions": {
+        "memoryMbytes": 256,
+        "timeoutSecs": 300
+    },
+    "pricing": {
+        "pricingModel": "PAY_PER_EVENT",
+        "pricingPerEvent": {
+            "actorChargeEvents": {
+                "tool-call-simple": {
+                    "eventTitle": "Simple lookup (web_search, extract_content, get_wikipedia, search_news, search_hackernews, score_reliability, resurrect_dead_link)",
+                    "eventPriceUsd": 0.01,
+                    "eventDescription": "Charged for simple lookup tool calls."
+                },
+                "tool-call-standard": {
+                    "eventTitle": "Standard search (Reddit, YouTube, Substack, Bluesky, Telegram, Mastodon, VK, OSM, trends, preprints, datasets, SEC filings)",
+                    "eventPriceUsd": 0.02,
+                    "eventDescription": "Charged for standard search tool calls."
+                },
+                "tool-call-premium": {
+                    "eventTitle": "Premium workflow (counter-arguments, citation verification, bibliography validation, citation formatting)",
+                    "eventPriceUsd": 0.03,
+                    "eventDescription": "Charged for premium academic workflow tool calls."
+                }
+            }
+        },
+        "minimalMaxTotalChargeUsd": 1.0
+    },
+    "dockerContextDir": "..",
+    "isPublic": true,
+    "defaultMemoryMbytes": 256,
+    "minMemoryMbytes": 256,
+    "maxMemoryMbytes": 1024
+}
