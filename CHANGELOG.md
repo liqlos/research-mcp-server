@@ -5,10 +5,14 @@
 ### Added
 - **`/tools` endpoint**: List all active tools with pricing tiers and prices.
 - **`/usage` endpoint**: Per-tool call counts and total calls for spending transparency.
+- **`/pricing` endpoint**: Full pricing breakdown by tier with tool lists.
+- **`/` root endpoint**: API info and endpoint directory.
 - **5xx retry**: `fetchWithTimeout` now retries on HTTP 5xx server errors (not just 429).
 - **Cost examples** in README: concrete pricing scenarios (100 web searches = $1.00, etc.).
 - **Use cases section** in README: 7 workflow examples showing tool chains.
+- **FAQ section** in README: 7 questions covering vs SerpAPI, free tier, error handling, etc.
 - **`cached` field** in dataset schema: matches actual tool response format.
+- **Pricing tier coverage tests**: verify every tool has a valid pricing tier.
 
 ### Changed
 - **README rewritten** as conversion-optimized landing page: value proposition, hero stats table, "Why This Exists" section, API endpoints table.
@@ -20,6 +24,7 @@
 ### Fixed
 - **Flaky `resurrectDeadLink` test**: switched to `httpstat.us/404` (guaranteed 404), accepts API-failure as valid outcome.
 - **Removed inline comment** in main.ts catch block (violated no-comments rule).
+- **MCP error responses** now include `requestId` for debugging.
 
 ## [0.1.1] — 2026-07-13 04:55 UTC
 

@@ -193,6 +193,7 @@ tools = await tool_spec.to_tool_list()
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
+| `/` | GET | API info and endpoint directory |
 | `/mcp` | POST | MCP protocol endpoint (tools/list, tools/call) |
 | `/mcp` | GET | Returns 405 (use POST) |
 | `/health` | GET | Server health check (status, tool count, preset, uptime) |

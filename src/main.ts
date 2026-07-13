@@ -891,6 +891,23 @@ app.get('/mcp', (_req, res) => {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
 });
 
+app.get('/', (_req, res) => {
+    res.json({
+        name: 'Research MCP Server',
+        version: '0.2.0',
+        description: '23 research tools for AI agents',
+        endpoints: {
+            '/mcp': 'POST — MCP protocol endpoint',
+            '/health': 'GET — health check',
+            '/tools': 'GET — list active tools with pricing',
+            '/usage': 'GET — usage stats',
+            '/pricing': 'GET — pricing breakdown by tier',
+        },
+        preset: activePreset,
+        toolCount: activeTools.size,
+    });
+});
+
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.2.0', uptime: Math.floor(process.uptime()) });
 });
