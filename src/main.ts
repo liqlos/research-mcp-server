@@ -40,6 +40,13 @@ export const server = new McpServer({
     version: '0.2.0',
 });
 
+function getServer(): McpServer {
+    return new McpServer({
+        name: 'research-mcp-server',
+        version: '0.2.0',
+    });
+}
+
 const requestIdStorage = new AsyncLocalStorage<string>();
 
 function getRequestId(): string {
@@ -401,7 +408,7 @@ function registerResearchTool(
     handler: (args: any, extra: any) => Promise<unknown>,
 ): void {
     if (!activeTools.has(name)) return;
-    server.registerTool(name, config as never, (async (args: unknown, extra: unknown) => {
+    currentTarget.registerTool(name, config as never, (async (args: unknown, extra: unknown) => {
         toolCallCounts.set(name, (toolCallCounts.get(name) ?? 0) + 1);
         totalToolCalls++;
         if (totalToolCalls % 100 === 0) {
@@ -416,7 +423,11 @@ function registerResearchTool(
     }) as never);
 }
 
-registerResearchTool(
+let currentTarget: McpServer = server;
+
+function registerAllTools(target: McpServer = server): void {
+    currentTarget = target;
+    registerResearchTool(
     'web_search',
     {
         description: 'Search the web via Google (with API key) or DuckDuckGo fallback. Returns titles, URLs, and snippets. Use for finding pages, answering factual questions, and discovering sources. Example: web_search({ query: "rust async runtime comparison", maxResults: 10 }) Do NOT use for academic papers — use search_preprints instead.',
@@ -857,6 +868,9 @@ registerResearchTool(
         return makeResult(JSON.stringify(result, null, 2), result);
     },
 );
+}
+
+registerAllTools();
 
 if (!process.env.VITEST) {
 const app = express();
@@ -877,13 +891,21 @@ app.post('/mcp', async (req, res) => {
     const requestId = crypto.randomUUID();
     try {
         log.info(`MCP request started: requestId=${requestId}`);
-        const transport = new StreamableHTTPServerTransport({});
-        await server.connect(transport as never);
-        await requestIdStorage.run(requestId, () => transport.handleRequest(req, res));
+        const requestServer = getServer();
+        registerAllTools(requestServer);
+        const transport = new StreamableHTTPServerTransport({} as { sessionIdGenerator?: () => string });
+        await requestServer.connect(transport as never);
+        await requestIdStorage.run(requestId, () => transport.handleRequest(req, res, req.body));
+        res.on('close', () => {
+            transport.close();
+            requestServer.close();
+        });
         log.info(`MCP request completed: requestId=${requestId}`);
     } catch (err) {
         log.error(`MCP request failed: requestId=${requestId} error=${(err as Error).message}`);
-        res.status(500).json({ error: 'MCP server error', requestId });
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'MCP server error', requestId });
+        }
     }
 });
 
