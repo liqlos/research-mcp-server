@@ -895,6 +895,25 @@ app.get('/health', (_req, res) => {
     res.json({ status: 'ok', tools: activeTools.size, preset: activePreset, version: '0.1.0', uptime: Math.floor(process.uptime()) });
 });
 
+app.get('/tools', (_req, res) => {
+    const tools = [...activeTools].map(name => ({
+        name,
+        pricingTier: toolPricingTier[name] ?? 'tool-call-standard',
+        priceUsd: toolPricingTier[name] === 'tool-call-simple' ? 0.01
+            : toolPricingTier[name] === 'tool-call-premium' ? 0.03 : 0.02,
+    }));
+    res.json({ preset: activePreset, count: tools.length, tools });
+});
+
+app.get('/usage', (_req, res) => {
+    res.json({
+        totalCalls: totalToolCalls,
+        perTool: Object.fromEntries(
+            [...toolCallCounts.entries()].sort((a, b) => b[1] - a[1]),
+        ),
+    });
+});
+
 const port = process.env.ACTOR_STANDBY_PORT || 3000;
 const httpServer = app.listen(Number(port), () => {
     log.info(`Research MCP server listening on port ${port}`);

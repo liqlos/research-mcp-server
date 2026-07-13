@@ -2,7 +2,7 @@
     "actorSpecification": 1,
     "name": "research-mcp-server",
     "title": "Research MCP Server — 23 Tools for AI Agents",
-    "description": "One MCP endpoint, 23 research tools: web search, content extraction, Reddit, YouTube, news, Hacker News, Wikipedia, preprints, datasets, reliability scoring, Substack, Wayback, Bluesky, Telegram, OpenStreetMap, trends, Mastodon, VK, counter-arguments, citation verification, bibliography validation, SEC filings, citation formatting. For Claude, Cursor, ChatGPT, and any MCP client.",
+    "description": "23 research tools for AI agents in one MCP server. Web search, content extraction, Reddit, YouTube, academic papers, citation verification, SEC filings, social media scanning, and more. Works with Claude, Cursor, ChatGPT, LangChain. Pay per call from $0.01.",
     "version": "0.1.0",
     "buildTag": "latest",
     "meta": {

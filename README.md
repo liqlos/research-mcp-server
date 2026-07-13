@@ -1,24 +1,57 @@
-# Research MCP Server — 23 Tools for AI Agents
+# Research MCP Server — 23 Research Tools for AI Agents
 
-One MCP endpoint, 23 research tools, one token, consistent JSON schema. Web, social, academic, and specialized data sources for Claude, Cursor, ChatGPT, LangChain, LlamaIndex, and any MCP client.
+**One endpoint. 23 tools. Web, social, academic, and financial data — for any MCP client.**
+
+Give your AI agent the ability to search the web, extract content, find academic papers, verify citations, scan social media, pull SEC filings, and more — all through a single MCP server. Works with Claude, Cursor, ChatGPT, LangChain, LlamaIndex, and any MCP-compatible client.
+
+| | |
+|---|---|
+| **Tools** | 23 (web, social, academic, financial, geographic) |
+| **Pricing** | $0.01–$0.03 per successful call. No charge on errors. |
+| **Setup** | 2 minutes. One URL, one token. |
+| **Rate limit** | 60 requests/minute |
+| **Presets** | Load only the tools you need (saves tokens) |
+
+## Why This Exists
+
+AI agents are only as good as their data. Without research tools, they hallucinate. With this MCP server, your agent can:
+
+- **Search the web** and extract clean content from any URL
+- **Find academic papers** on arXiv, bioRxiv, medRxiv and verify citations against Crossref/OpenAlex
+- **Scan social platforms** — Reddit, Hacker News, YouTube, Bluesky, Telegram, Mastodon, VK, Substack
+- **Pull financial data** — SEC EDGAR filings by ticker
+- **Find geographic data** — OpenStreetMap POIs and amenities
+- **Detect trends** across multiple platforms simultaneously
+- **Resurrect dead links** via the Wayback Machine
+- **Score source reliability** with rule-based tier scoring
 
 ## Quick Start
 
 ```bash
-# List all tools
+# 1. List all 23 tools
 curl -X POST https://mcp.apify.com/mcp?tools=research-mcp-server \
   -H "Authorization: Bearer $APIFY_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
 
-# Call web_search
+# 2. Call web_search
 curl -X POST https://mcp.apify.com/mcp?tools=research-mcp-server \
   -H "Authorization: Bearer $APIFY_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"web_search","arguments":{"query":"AI agents 2025"}},"id":2}'
 ```
 
-If you see a JSON response with 23 tool definitions, your token works. Then configure your MCP client (see [MCP Setup](#mcp-setup)).
+If you see a JSON response with 23 tool definitions, your token works. Then configure your MCP client below.
+
+## Use Cases
+
+- **Research assistant**: `web_search` → `extract_content` → `score_reliability` → `find_counter_arguments` → `verify_citations` → `format_citations`
+- **Market intelligence**: `detect_trends` → `search_reddit` → `search_hackernews` → `search_news`
+- **Academic workflow**: `search_preprints` → `search_datasets` → `find_counter_arguments` → `validate_bibliography`
+- **Financial research**: `search_sec_filings` → `extract_content` → `score_reliability`
+- **Social listening**: `search_bluesky` → `search_telegram` → `search_mastodon` → `search_vk`
+- **Link rescue**: `resurrect_dead_link` → `extract_content` (read archived content)
+- **Location research**: `search_osm` → `extract_content` (pull details from POI websites)
 
 ## Tools
 
@@ -30,7 +63,7 @@ If you see a JSON response with 23 tool definitions, your token works. Then conf
 | `extract_content` | Clean text from any URL | `extract_content({ url: "https://example.com/article" })` |
 | `search_news` | Google News RSS | `search_news({ query: "AI regulation EU" })` |
 | `get_wikipedia` | Wikipedia article summary | `get_wikipedia({ query: "quantum entanglement" })` |
-| `resurrect_dead_link` | Find archived version via Wayback Machine | `resurrect_dead_link({ url: "https://example.com/old-article" })` |
+| `resurrect_dead_link` | Find archived version via Wayback Machine | `resurrect_dead_link({ url: "https://example.com/old" })` |
 | `score_reliability` | Rule-based source reliability scoring | `score_reliability({ urls: ["https://en.wikipedia.org/wiki/Rust"] })` |
 
 ### Social & Discussion — $0.02/call
@@ -54,7 +87,7 @@ If you see a JSON response with 23 tool definitions, your token works. Then conf
 | `search_preprints` | arXiv, bioRxiv, medRxiv preprints | `search_preprints({ query: "CRISPR gene editing" })` |
 | `search_datasets` | Zenodo, Figshare, OSF data repositories | `search_datasets({ query: "climate change data" })` |
 | `find_counter_arguments` | Academic papers supporting/contrasting a claim | `find_counter_arguments({ query: "transformers are better than RNNs" })` |
-| `verify_citations` | Verify citations against Crossref and OpenAlex | `verify_citations({ references: ["Vaswani et al. (2017). Attention Is All You Need."] })` |
+| `verify_citations` | Verify citations against Crossref and OpenAlex | `verify_citations({ references: ["Vaswani et al. (2017)..."] })` |
 | `validate_bibliography` | Validate entire bibliography with auto-format detection | `validate_bibliography({ bibliography: "Vaswani et al. (2017)..." })` |
 | `format_citations` | Generate BibTeX, APA, MLA, Chicago, RIS from DOIs | `format_citations({ doi: "10.1038/nature12373", format: "bibtex" })` |
 
@@ -67,7 +100,7 @@ If you see a JSON response with 23 tool definitions, your token works. Then conf
 
 ### Response Format
 
-All tools return `{ query, count, results }`. Errors return `{ query, count: 0, results: [], error: "message" }`.
+All tools return `{ query, count, results }`. Errors return `{ query, count: 0, results: [], error: "message" }`. You only pay for successful calls — errors are free.
 
 ### Presets
 
@@ -81,7 +114,7 @@ Reduce token overhead by loading only needed tools. Configure via Actor input JS
 | `academic` | search_preprints, search_datasets, find_counter_arguments, verify_citations, validate_bibliography, format_citations | 6 |
 | `data` | search_osm, search_sec_filings | 2 |
 
-## MCP Setup
+## MCP Client Setup
 
 ### Claude Desktop
 
@@ -146,9 +179,25 @@ tools = await tool_spec.to_tool_list()
 | Standard search | $0.02/call | search_reddit, search_youtube, search_substack, search_bluesky, search_telegram, search_mastodon, search_vk, search_osm, detect_trends, search_preprints, search_datasets, search_sec_filings |
 | Premium workflow | $0.03/call | find_counter_arguments, verify_citations, validate_bibliography, format_citations |
 
-Pay only for successful calls. No subscription, no minimum.
+**Pay only for successful calls.** No subscription, no minimum. If a tool returns an error, you are not charged.
 
-**Cost tips:** Use presets to reduce token overhead. Lower `maxResults` for faster calls. Use `score_reliability` before expensive citation tools. Simple lookups ($0.01) are cheapest — start there.
+**Cost examples:**
+- 100 web searches = $1.00
+- 50 Reddit searches + 25 YouTube searches = $1.50
+- 20 citation verifications + 10 bibliography validations = $0.90
+- Full research workflow (search → extract → score → verify → format) = ~$0.08
+
+**Cost tips:** Use presets to reduce token overhead. Lower `maxResults` for faster, cheaper calls. Use `score_reliability` before expensive citation tools. Simple lookups ($0.01) are cheapest — start there.
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/mcp` | POST | MCP protocol endpoint (tools/list, tools/call) |
+| `/mcp` | GET | Returns 405 (use POST) |
+| `/health` | GET | Server health check (status, tool count, preset, uptime) |
+| `/tools` | GET | List all active tools with pricing tiers |
+| `/usage` | GET | Usage stats (total calls, per-tool call counts) |
 
 ## Rate Limits
 
