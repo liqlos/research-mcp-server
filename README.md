@@ -287,3 +287,23 @@ npm run build
 npm test
 npm run start:dev
 ```
+
+## Deployment
+
+This actor is configured for Apify's platform. To deploy:
+
+```bash
+# Install Apify CLI
+npm i -g apify
+
+# Login
+apify login
+
+# Push to Apify (builds and deploys)
+apify push
+
+# After deployment, set SEO title and description in:
+# Apify Console → Actor → Publication → Display information
+```
+
+The actor uses standby mode for instant MCP responses. No cold-start delay after the first request.
