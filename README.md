@@ -102,6 +102,29 @@ If you see a JSON response with 23 tool definitions, your token works. Then conf
 
 All tools return `{ query, count, results }`. Errors return `{ query, count: 0, results: [], error: "message" }`. You only pay for successful calls — errors are free.
 
+**Example — `web_search({ query: "rust async runtime" })`:**
+```json
+{
+  "query": "rust async runtime",
+  "count": 3,
+  "results": [
+    { "title": "Tokio — Async runtime for Rust", "url": "https://tokio.rs", "snippet": "Tokio is an async runtime...", "source": "duckduckgo" },
+    { "title": "async-std — Alternative async runtime", "url": "https://async.rs", "snippet": "async-std provides...", "source": "duckduckgo" }
+  ]
+}
+```
+
+**Example — `score_reliability({ urls: ["https://en.wikipedia.org/wiki/Rust"] })`:**
+```json
+{
+  "query": "https://en.wikipedia.org/wiki/Rust",
+  "count": 1,
+  "results": [
+    { "url": "https://en.wikipedia.org/wiki/Rust", "reliabilityScore": 1.0, "reliabilityTier": "HIGH", "domain": "en.wikipedia.org" }
+  ]
+}
+```
+
 ### Presets
 
 Reduce token overhead by loading only needed tools. Configure via Actor input JSON `{"preset": "web"}` in Apify Console.
@@ -239,7 +262,7 @@ This actor respects robots.txt, rate limits, and platform terms of service. User
 SerpAPI and Serper only do web search. This server covers 23 tools across web, social, academic, financial, and geographic data — all through one MCP endpoint. No need to manage multiple API keys, billing accounts, and integrations.
 
 **How is this different from building my own tools?**
-Building 23 research tools from scratch takes weeks: API integrations, error handling, caching, rate limiting, testing, deployment. This server is production-ready, tested (70 tests), and deployed on Apify's infrastructure with standby mode for instant responses.
+Building 23 research tools from scratch takes weeks: API integrations, error handling, caching, rate limiting, testing, deployment. This server is production-ready, tested (71 tests), and deployed on Apify's infrastructure with standby mode for instant responses.
 
 **Do I pay for failed calls?**
 No. You only pay for successful tool calls. If a tool returns an error (API down, invalid input, rate limited), you are not charged.
