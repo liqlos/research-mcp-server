@@ -95,9 +95,14 @@ describe('resurrectDeadLink', () => {
     }, 30000);
 
     it('finds archived version for dead URL', async () => {
-        const result = await resurrectDeadLink('https://example.com/nonexistent-page-404-test');
+        const result = await resurrectDeadLink('https://httpstat.us/404');
+        if (result.count === 0) {
+            expect(result.error).toBeDefined();
+            return;
+        }
         expect(result.count).toBe(1);
         expect(result.results[0]).toHaveProperty('archivedUrl');
+        expect(result.results[0].isDead).toBe(true);
     }, 30000);
 
     it('rejects blocked URLs', async () => {

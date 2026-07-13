@@ -410,7 +410,7 @@ function registerResearchTool(
         const result = await handler(args, extra) as { structuredContent?: { error?: unknown } };
         if (!result?.structuredContent?.error) {
             const tier = toolPricingTier[name] ?? 'tool-call-standard';
-            try { await Actor.charge({ eventName: tier }); } catch { /* tests don't init Actor */ }
+            try { await Actor.charge({ eventName: tier }); } catch { }
         }
         return result;
     }) as never);

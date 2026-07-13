@@ -22,7 +22,14 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "properties": {}
+                                "properties": {
+                                    "preset": {
+                                        "type": "string",
+                                        "description": "Select which tools to load: all (23 tools), web (6), social (9), academic (6), data (2)",
+                                        "default": "all",
+                                        "enum": ["all", "web", "social", "academic", "data"]
+                                    }
+                                }
                             }
                         }
                     }

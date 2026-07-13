@@ -251,7 +251,7 @@ export async function fetchWithTimeout(url: string, options: RequestInit = {}, r
             const fetchOptions: Record<string, unknown> = { ...options, signal: controller.signal };
             if (dispatcher) fetchOptions.dispatcher = dispatcher;
             const resp = await fetch(url, fetchOptions as RequestInit);
-            if (resp.status === 429 && attempt < retries) {
+            if ((resp.status === 429 || resp.status >= 500) && attempt < retries) {
                 clearTimeout(timeout);
                 const retryAfter = resp.headers.get('retry-after');
                 const parsed = parseInt(retryAfter || '', 10);
