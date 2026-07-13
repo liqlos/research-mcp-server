@@ -1,6 +1,7 @@
 {
     "type": "object",
     "schemaVersion": 1,
+    "title": "Research MCP Server Input",
     "properties": {
         "preset": {
             "type": "string",

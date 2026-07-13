@@ -1,31 +1,45 @@
 {
+    "actorSpecification": 1,
     "title": "Research MCP Server Results",
-    "type": "object",
-    "properties": {
-        "tool": {
-            "type": "string",
-            "description": "Tool name that was called"
+    "fields": {
+        "type": "object",
+        "properties": {
+            "tool": {
+                "type": "string",
+                "description": "Tool name that was called"
+            },
+            "query": {
+                "type": "string",
+                "description": "Query or URL passed to the tool"
+            },
+            "count": {
+                "type": "integer",
+                "description": "Number of results returned"
+            },
+            "results": {
+                "type": "array",
+                "description": "Tool results array"
+            },
+            "error": {
+                "type": "string",
+                "description": "Error message if tool failed"
+            },
+            "cached": {
+                "type": "boolean",
+                "description": "Whether the result was served from cache"
+            }
         },
-        "query": {
-            "type": "string",
-            "description": "Query or URL passed to the tool"
-        },
-        "count": {
-            "type": "integer",
-            "description": "Number of results returned"
-        },
-        "results": {
-            "type": "array",
-            "description": "Tool results array"
-        },
-        "error": {
-            "type": "string",
-            "description": "Error message if tool failed"
-        },
-        "cached": {
-            "type": "boolean",
-            "description": "Whether the result was served from cache"
-        }
+        "required": ["tool", "query", "count"]
     },
-    "required": ["tool", "query", "count"]
+    "views": {
+        "overview": {
+            "title": "Tool Results Overview",
+            "transformation": {
+                "fields": ["tool", "query", "count", "error", "cached"]
+            },
+            "display": {
+                "component": "table"
+            }
+        }
+    }
 }

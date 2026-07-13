@@ -3,7 +3,7 @@
     "name": "research-mcp-server",
     "title": "Research MCP Server — 23 Tools for AI Agents",
     "description": "23 research tools for AI agents in one MCP server. Web search, content extraction, Reddit, YouTube, academic papers, citation verification, SEC filings, social media scanning, and more. Works with Claude, Cursor, ChatGPT, LangChain. Pay per call from $0.01.",
-    "version": "0.2.0",
+    "version": "0.2",
     "buildTag": "latest",
     "meta": {
         "templateId": "ts-mcp-empty"
@@ -13,10 +13,9 @@
     },
     "dockerfile": "../Dockerfile",
     "categories": [
-        "MCP",
-        "AI_API",
-        "AGENTS",
-        "SOCIAL_MEDIA"
+        "AI",
+        "SOCIAL_MEDIA",
+        "DEVELOPER_TOOLS"
     ],
     "usesStandbyMode": true,
     "webServerSchema": "./openapi.json",
