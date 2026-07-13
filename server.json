@@ -1,0 +1,30 @@
+{
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.liqlos/research-mcp-server",
+    "description": "23 research tools for AI agents: web search, social media, academic papers, SEC filings, citations.",
+    "repository": {
+        "url": "https://github.com/liqlos/research-mcp-server",
+        "source": "github"
+    },
+    "version": "0.2.0",
+    "packages": [
+        {
+            "registryType": "remote",
+            "identifier": "https://benefic-cube--research-mcp-server.apify.actor/mcp",
+            "version": "0.2.0",
+            "transport": {
+                "type": "streamable-http",
+                "url": "https://benefic-cube--research-mcp-server.apify.actor/mcp"
+            },
+            "environmentVariables": [
+                {
+                    "description": "Apify API token for authentication",
+                    "isRequired": true,
+                    "format": "string",
+                    "isSecret": true,
+                    "name": "APIFY_TOKEN"
+                }
+            ]
+        }
+    ]
+}
